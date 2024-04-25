@@ -1,4 +1,3 @@
-##hi
 import math,random
 import pygame
 
