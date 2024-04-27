@@ -3,7 +3,34 @@ import sys
 import sudoku_generator
 from sudoku_generator import generate_sudoku
 import board
+import random
+import math
 
+# Define the Cell class
+class Cell:
+    def __init__(self, value, row, col, screen):
+        self.value = value
+        self.row = row
+        self.col = col
+        self.screen = screen
+        self.font = pygame.font.Font(None, 36)
+        self.cell_width = 60
+        self.cell_height = 60
+        self.x = col * self.cell_width + 50
+        self.y = row * self.cell_height + 50
+
+    def draw(self):
+        # Draw cell
+        pygame.draw.rect(self.screen, (255, 255, 255), (self.x, self.y, self.cell_width, self.cell_height))
+        
+        # Draw value inside cell
+        if self.value != 0:
+            text_surface = self.font.render(str(self.value), True, (0, 0, 0))
+            text_rect = text_surface.get_rect(center=(self.x + self.cell_width // 2, self.y + self.cell_height // 2))
+            self.screen.blit(text_surface, text_rect)
+        
+        # Draw border
+        pygame.draw.rect(self.screen, (0, 0, 0), (self.x, self.y, self.cell_width, self.cell_height), 1)
 
 # Initialize Pygame and set up the display
 pygame.init()
