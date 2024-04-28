@@ -52,20 +52,27 @@ class Cell:
 class GameStartScreen:
     def __init__(self, win):
         self.win = win
+        self.win_width = 450  # New window width
+        self.win_height = 700  # New window height
+        self.win.fill((255, 255, 255))
+
+        self.title_font = pygame.font.SysFont("comicsans", 60)
+        self.title_text = self.title_font.render("Sudoku", True, (0, 0, 0))
+        self.title_rect = self.title_text.get_rect(center=(self.win_width // 2, 100))  # Center the title
+
+        self.button_font = pygame.font.SysFont("comicsans", 30)
         self.buttons = [
-            Button("Easy", 150, 200, 100, 50, (0, 255, 0), 30),
-            Button("Medium", 150, 300, 100, 50, (255, 165, 0), 30),
-            Button("Hard", 150, 400, 100, 50, (255, 0, 0), 30)
+            Button("Easy", self.win_width // 2 - 50, 300, 100, 50, (0, 255, 0), 30),
+            Button("Medium", self.win_width // 2 - 50, 400, 100, 50, (255, 165, 0), 30),
+            Button("Hard", self.win_width // 2 - 50, 500, 100, 50, (255, 0, 0), 30)
         ]
         self.difficulty = None
 
     def draw(self):
-        self.win.fill((255, 255, 255))
-        font = pygame.font.SysFont("comicsans", 60)
-        text = font.render("Sudoku", 1, (0, 0, 0))
-        self.win.blit(text, (150, 100))
+        self.win.blit(self.title_text, self.title_rect)  # Draw the title
+
         for button in self.buttons:
-            button.draw(self.win)
+            button.draw(self.win)  # Draw the buttons
 
     def handle_click(self, pos):
         for button in self.buttons:
@@ -73,6 +80,7 @@ class GameStartScreen:
                 self.difficulty = button.text.lower()
                 return self.difficulty
         return None
+
 
 
 class Board:
