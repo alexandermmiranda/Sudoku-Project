@@ -3,6 +3,7 @@ import random
 
 pygame.font.init()
 
+
 class Button:
     def __init__(self, text, x, y, width, height, color, font_size):
         self.text = text
@@ -17,11 +18,13 @@ class Button:
         pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.height))
         font = pygame.font.SysFont("comicsans", self.font_size)
         text = font.render(self.text, 1, (255, 255, 255))
-        win.blit(text, (self.x + (self.width / 2 - text.get_width() / 2), self.y + (self.height / 2 - text.get_height() / 2)))
+        win.blit(text,
+                 (self.x + (self.width / 2 - text.get_width() / 2), self.y + (self.height / 2 - text.get_height() / 2)))
 
     def is_hover(self, pos):
         return self.x < pos[0] < self.x + self.width and self.y < pos[1] < self.y + self.height
-    
+
+
 class Cell:
     def __init__(self, x, y, value=0):
         self.x = x
@@ -30,13 +33,17 @@ class Cell:
         self.width = 50
         self.height = 50
 
-    def draw(self, win):
-        pygame.draw.rect(win, (255, 255, 255), (self.x, self.y, self.width, self.height), 2)
+    def draw(self, win, selected):
+        if selected:
+            pygame.draw.rect(win, (255, 0, 0), (self.x, self.y, self.width, self.height))
+        else:
+            pygame.draw.rect(win, (255, 255, 255), (self.x, self.y, self.width, self.height), 2)
         if self.value != 0:
             font = pygame.font.SysFont("comicsans", 30)
             text = font.render(str(self.value), 1, (0, 0, 0))
             win.blit(text, (self.x + (self.width / 2 - text.get_width() / 2),
                             self.y + (self.height / 2 - text.get_height() / 2)))
+
 
 class GameStartScreen:
     def __init__(self, win):
@@ -63,6 +70,7 @@ class GameStartScreen:
                 return self.difficulty
         return None
 
+
 class Board:
     def __init__(self, rows, cols, win):
         self.rows = rows
@@ -75,15 +83,22 @@ class Board:
         self.cell_height = 50
 
     def draw(self):
-        for i in range(self.rows + 1):
-            pygame.draw.line(self.win, (0, 0, 0), (0, i * self.cell_height),
-                             (self.cols * self.cell_width, i * self.cell_height))
-        for j in range(self.cols + 1):
-            pygame.draw.line(self.win, (0, 0, 0), (j * self.cell_width, 0),
-                             (j * self.cell_width, self.rows * self.cell_height))
-
+        self.win.fill((255, 255, 255))
+        # Draw thicker lines around each 3x3 square
+        for i in range(0, self.rows + 1, 3):
+            line_width = 3 if i % 3 == 0 else 1
+            pygame.draw.line(self.win, (0, 0, 0), (0, i * self.cell_height), (self.cols * self.cell_width, i * self.cell_height), line_width)
+            pygame.draw.line(self.win, (0, 0, 0), (i * self.cell_width, 0), (i * self.cell_width, self.rows * self.cell_height), line_width)
+        # Draw thinner lines within each square and highlight the selected cell
         for i in range(self.rows):
             for j in range(self.cols):
+                line_width = 3 if (i % 3 == 0 or j % 3 == 0) else 1
+                pygame.draw.line(self.win, (0, 0, 0), (j * self.cell_width, i * self.cell_height),
+                                 ((j + 1) * self.cell_width, i * self.cell_height), line_width)
+                pygame.draw.line(self.win, (0, 0, 0), (j * self.cell_width, i * self.cell_height),
+                                 (j * self.cell_width, (i + 1) * self.cell_height), line_width)
+                if self.selected and (i, j) == self.selected:
+                    pygame.draw.rect(self.win, (255, 0, 0), (j * self.cell_width, i * self.cell_height, self.cell_width, self.cell_height), 3)
                 if self.board[i][j] != 0:
                     font = pygame.font.SysFont("comicsans", 30)
                     text = font.render(str(self.board[i][j]), 1, (0, 0, 0))
@@ -116,7 +131,8 @@ class Board:
             if self.board[row][col] != 0:
                 self.board[row][col] = 0
 
-class SudokuGenerator:  # Changed class name to SudokuGenerator
+
+class SudokuGenerator:
     def __init__(self, win, difficulty):
         self.win = win
         self.difficulty = difficulty
@@ -162,6 +178,7 @@ class SudokuGenerator:  # Changed class name to SudokuGenerator
                                 board[i][j] = 0  # Backtrack
                         return False
             return True
+
         # Solve the Sudoku board
         solve(board)
 
@@ -219,12 +236,14 @@ class SudokuGenerator:  # Changed class name to SudokuGenerator
             return True
         return False
 
+
 def display_end_screen(win, text):
     win.fill((255, 255, 255))
     font = pygame.font.SysFont("comicsans", 60)
     text_surf = font.render(text, True, (0, 0, 0))
     win.blit(text_surf, (150, 250))
     pygame.display.update()
+
 
 def main():
     pygame.init()
@@ -314,5 +333,7 @@ def main():
 
         pygame.display.update()
 
+
 if __name__ == "__main__":
     main()
+
