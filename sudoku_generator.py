@@ -35,14 +35,18 @@ class Cell:
 
     def draw(self, win, selected):
         if selected:
-            pygame.draw.rect(win, (255, 0, 0), (self.x, self.y, self.width, self.height))
+            pygame.draw.rect(win, (255, 0, 0), (self.x - 1, self.y - 1, self.width + 2, self.height + 2), 3)  # Red outline when selected
         else:
-            pygame.draw.rect(win, (255, 255, 255), (self.x, self.y, self.width, self.height), 2)
+            pygame.draw.rect(win, (255, 255, 255), (self.x - 1, self.y - 1, self.width + 2, self.height + 2), 2)  # Grid outline
+
         if self.value != 0:
             font = pygame.font.SysFont("comicsans", 30)
             text = font.render(str(self.value), 1, (0, 0, 0))
             win.blit(text, (self.x + (self.width / 2 - text.get_width() / 2),
                             self.y + (self.height / 2 - text.get_height() / 2)))
+
+        # Draw grid outline inside the cell
+        pygame.draw.rect(win, (0, 0, 0), (self.x, self.y, self.width, self.height), 1)
 
 
 class GameStartScreen:
@@ -83,27 +87,27 @@ class Board:
         self.cell_height = 50
 
     def draw(self):
-        self.win.fill((255, 255, 255))
-        # Draw thicker lines around each 3x3 square
-        for i in range(0, self.rows + 1, 3):
-            line_width = 3 if i % 3 == 0 else 1
-            pygame.draw.line(self.win, (0, 0, 0), (0, i * self.cell_height), (self.cols * self.cell_width, i * self.cell_height), line_width)
-            pygame.draw.line(self.win, (0, 0, 0), (i * self.cell_width, 0), (i * self.cell_width, self.rows * self.cell_height), line_width)
-        # Draw thinner lines within each square and highlight the selected cell
+        # Draw outer grid lines and bold lines every 3 columns and rows
+        for i in range(self.rows):
+            line_thickness = 4 if i % 3 == 0 and i != 0 else 1
+            pygame.draw.line(self.win, (0, 0, 0), (0, i * self.cell_height),
+                             (self.cols * self.cell_width, i * self.cell_height), line_thickness)
+        pygame.draw.line(self.win, (0, 0, 0), (0, self.rows * self.cell_height),
+                         (self.cols * self.cell_width, self.rows * self.cell_height), 4)  # Bottom bold line
+
+        for j in range(self.cols):
+            line_thickness = 4 if j % 3 == 0 and j != 0 else 1
+            pygame.draw.line(self.win, (0, 0, 0), (j * self.cell_width, 0),
+                             (j * self.cell_width, self.rows * self.cell_height), line_thickness)
+
+        # Draw cells
         for i in range(self.rows):
             for j in range(self.cols):
-                line_width = 3 if (i % 3 == 0 or j % 3 == 0) else 1
-                pygame.draw.line(self.win, (0, 0, 0), (j * self.cell_width, i * self.cell_height),
-                                 ((j + 1) * self.cell_width, i * self.cell_height), line_width)
-                pygame.draw.line(self.win, (0, 0, 0), (j * self.cell_width, i * self.cell_height),
-                                 (j * self.cell_width, (i + 1) * self.cell_height), line_width)
-                if self.selected and (i, j) == self.selected:
-                    pygame.draw.rect(self.win, (255, 0, 0), (j * self.cell_width, i * self.cell_height, self.cell_width, self.cell_height), 3)
-                if self.board[i][j] != 0:
-                    font = pygame.font.SysFont("comicsans", 30)
-                    text = font.render(str(self.board[i][j]), 1, (0, 0, 0))
-                    self.win.blit(text, (j * self.cell_width + (self.cell_width / 2 - text.get_width() / 2),
-                                         i * self.cell_height + (self.cell_height / 2 - text.get_height() / 2)))
+                selected = False
+                if self.selected == (i, j):
+                    selected = True
+                cell = Cell(j * self.cell_width, i * self.cell_height, self.board[i][j])
+                cell.draw(self.win, selected)
 
     def click(self, pos):
         x, y = pos
@@ -252,6 +256,8 @@ def main():
 
     game_start_screen = GameStartScreen(win)
     run = True
+
+    difficulty = None  # Ensure the variable is assigned even if the loop is exited without selecting difficulty
 
     while run:
         for event in pygame.event.get():
