@@ -82,7 +82,6 @@ class GameStartScreen:
         return None
 
 
-
 class Board:
     def __init__(self, rows, cols, win):
         self.rows = rows
@@ -150,6 +149,12 @@ class SudokuGenerator:
         self.difficulty = difficulty
         self.board = Board(9, 9, win)
 
+    def generate_random_board(self):
+        # Create a random Sudoku board
+        board = [[0 for _ in range(9)] for _ in range(9)]
+        self.fill_values(board)
+        return board
+
     def generate_board(self):
         # Generate Sudoku board based on the selected difficulty
         if self.difficulty == "easy":
@@ -159,16 +164,11 @@ class SudokuGenerator:
         elif self.difficulty == "hard":
             empty_cells = 50
 
-        self.board.initial_board = self.generate_sudoku_board()  # Store the initial state
+        self.board.initial_board = self.generate_random_board()  # Generate a random board
         self.board.board = [row[:] for row in self.board.initial_board]  # Set the board to its initial state
         self.remove_cells(empty_cells)
 
-    def generate_sudoku_board(self):
-        board = [[0 for _ in range(9)] for _ in range(9)]
-        self.fill_values(board)
-        return board
-
-    def fill_values(self, board):
+    def generate_solution(self, board):
         # Helper function to recursively fill the Sudoku board
         def is_valid(board, row, col, num):
             # Check if the number is not already used in current row, column, and subgrid
@@ -193,6 +193,24 @@ class SudokuGenerator:
 
         # Solve the Sudoku board
         solve(board)
+
+    def fill_values(self, board):
+        self.generate_solution(board)
+
+        # Generate a random order of numbers from 1 to 9
+        numbers = list(range(1, 10))
+        random.shuffle(numbers)
+
+        # Assign each number to each 3x3 subgrid without repetition
+        for i in range(0, 9, 3):
+            for j in range(0, 9, 3):
+                subgrid_values = numbers[:]
+                random.shuffle(subgrid_values)
+                for x in range(3):
+                    for y in range(3):
+                        board[i + x][j + y] = subgrid_values.pop()
+
+        return board
 
     def remove_cells(self, empty_cells):
         # Randomly remove cells to create the puzzle
