@@ -9,7 +9,7 @@ Install Pygame by running pip install pygame in your terminal or command prompt.
 
 *How to Play*
 
-Run the sudoku.py file.
+Run the sudoku_generator.py file.
 The game will start with a difficulty selection screen where you can choose between Easy, Medium, and Hard levels.
 Click on the desired difficulty level to start the game.
 Use the mouse to click on the cells and keyboard numbers to input your guesses.
