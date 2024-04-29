@@ -197,20 +197,33 @@ class SudokuGenerator:
     def fill_values(self, board):
         self.generate_solution(board)
 
-        # Generate a random order of numbers from 1 to 9
-        numbers = list(range(1, 10))
-        random.shuffle(numbers)
-
-        # Assign each number to each 3x3 subgrid without repetition
-        for i in range(0, 9, 3):
-            for j in range(0, 9, 3):
-                subgrid_values = numbers[:]
-                random.shuffle(subgrid_values)
-                for x in range(3):
-                    for y in range(3):
-                        board[i + x][j + y] = subgrid_values.pop()
+        # Assign each number to each cell without repetition
+        for i in range(9):
+            for j in range(9):
+                numbers = list(range(1, 10))
+                random.shuffle(numbers)
+                for num in numbers:
+                    if self.is_valid(board, i, j, num):  # Check if the number is valid
+                        board[i][j] = num
+                        break
 
         return board
+
+    def is_valid(self, board, row, col, num):
+        # Check if the number is not already used in current row, column, and subgrid
+        for i in range(9):
+            if (board[row][i] == num) or (board[i][col] == num):
+                return False
+
+        # Check the 3x3 subgrid
+        row_start = (row // 3) * 3
+        col_start = (col // 3) * 3
+        for i in range(row_start, row_start + 3):
+            for j in range(col_start, col_start + 3):
+                if board[i][j] == num:
+                    return False
+
+        return True
 
     def remove_cells(self, empty_cells):
         # Randomly remove cells to create the puzzle
